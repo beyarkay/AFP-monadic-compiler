@@ -1,5 +1,4 @@
 G52AFP Coursework 2 - Monadic Compiler
-
 Your full name(s) - Thomas Cotter, Ray Garner
 Your full email address(es) - psytc8@nottingham.ac.uk, psyrg4@nottingham.ac.uk
 
@@ -32,6 +31,7 @@ Factorial example:
 
 > test :: Expr
 > test = App Mul (App Add (Val 1) (Val 2)) (App Add (Val 3) (Val 4))
+
 
 Virtual machine:
 
@@ -86,5 +86,21 @@ State monad:
 > compexpr (Val n) = [PUSH n]
 > compexpr (Var x) = [PUSHV x]
 > compexpr (App o x y) = compexpr x ++ compexpr y ++ [DO o]                                      
+
+
+> comprog :: Prog -> Label -> (Code, Label)
+> comprog (Assign n e) l = (compexpr e ++ [POP n], l)
+> comprog (While e p) l = ([LABEL l] ++ compexpr e ++ [JUMPZ (l+1)] ++ cp ++ [JUMP l, LABEL (l+1)], lp)
+>                         where
+>                           (cp, lp) = comprog p (l+2)
+> comprog (Seqn []) l = ([],l)
+> comprog (Seqn (p:ps)) l = ([] ++ c ++ c', l'')
+>                           where
+>                            (c,l') = comprog p l
+>                            (c',l'') = comprog (Seqn ps) l' 
+> comprog (If e p1 p2) l = (compexpr e ++ [JUMPZ (l+1), JUMP l, LABEL (l+1)] ++ cp2 ++ [JUMP (l+2), LABEL l] ++ cp1 ++ [LABEL (l+2)], lp1)
+>                          where
+>                           (cp2, lp2) = comprog p2 (l+2)
+>                           (cp1, lp1) = comprog p1 lp2
 
 --------------------------------------------------------------------------------
