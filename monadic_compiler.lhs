@@ -30,6 +30,9 @@ Factorial example:
 >                  [Assign 'A' (App Mul (Var 'A') (Var 'B')),
 >                   Assign 'B' (App Sub (Var 'B') (Val 1))])]
 
+> test :: Expr
+> test = App Mul (App Add (Val 1) (Val 2)) (App Add (Val 3) (Val 4))
+
 Virtual machine:
 
 > type Stack = [Int]
@@ -77,5 +80,11 @@ State monad:
 >
 >    -- (>>=) :: ST a -> (a -> ST b) -> ST b
 >    st >>= f = S (\s -> let (x,s') = app st s in app (f x) s')
+
+
+> compexpr :: Expr -> Code
+> compexpr (Val n) = [PUSH n]
+> compexpr (Var x) = [PUSHV x]
+> compexpr (App o x y) = compexpr x ++ compexpr y ++ [DO o]                                      
 
 --------------------------------------------------------------------------------
