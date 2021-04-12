@@ -1,7 +1,7 @@
 G52AFP Coursework 2 - Monadic Compiler
 
-Your full name(s) - Thomas Cotter
-Your full email address(es) - psytc8@nottingham.ac.uk
+Your full name(s) - Thomas Cotter, Ray Garner
+Your full email address(es) - psytc8@nottingham.ac.uk, psyrg4@nottingham.ac.uk
 
 --------------------------------------------------------------------------------
 
