@@ -78,4 +78,28 @@ State monad:
 >    -- (>>=) :: ST a -> (a -> ST b) -> ST b
 >    st >>= f = S (\s -> let (x,s') = app st s in app (f x) s')
 
+Exercise 1
+==========
+translates program into machine code
+comp :: Prog -> Code
+
+compiles expressions into code
+compiler correctness p240
+compexpr :: Expr -> Code
+
+similar to tree relabelling example on p171
+compprog :: Prog -> Label -> (Code,Label)
+
+and then refactor as:
+compprog :: Prog -> ST Code
+
+
+Exercise 2
+==========
+simple haskell (no functors, applicatives or monads)
+use program counter?
+use 2 copies of code?
+exec :: Code -> Mem
+
+
 --------------------------------------------------------------------------------
