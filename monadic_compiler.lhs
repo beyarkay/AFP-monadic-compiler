@@ -82,6 +82,7 @@ State monad:
 >    st >>= f = S (\s -> let (x,s') = app st s in app (f x) s')
 
 
+
 > compexpr :: Expr -> Code
 > compexpr (Val n) = [PUSH n]
 > compexpr (Var x) = [PUSHV x]
@@ -115,5 +116,15 @@ State monad:
 >                           l' <- nextLabel
 >                           cp <- comprog' p
 >                           return ([LABEL l] ++ compexpr e ++ [JUMPZ l'] ++ cp ++ [JUMP l, LABEL l'])
+> comprog' (If e p1 p2) = do l <- nextLabel
+>                            l' <- nextLabel
+>                            l'' <- nextLabel
+>                            cp1 <- comprog' p1
+>                            cp2 <- comprog' p2
+>                            return (compexpr e ++ [JUMPZ l', JUMP l, LABEL l'] ++ cp2 ++ [JUMP l'', LABEL l] ++ cp1 ++ [LABEL l''])
+> comprog' (Seqn []) = return []
+> comprog' (Seqn (p:ps)) = do c <- comprog' p
+>                             c' <- comprog' (Seqn ps)
+>                             return (c ++ c')
 
 --------------------------------------------------------------------------------
