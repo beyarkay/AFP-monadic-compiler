@@ -107,8 +107,11 @@ State monad:
 > nextLabel :: ST Label
 > nextLabel = S (\n -> (n, n+1))
 
-                    State -> (Code, State)
-                    Label -> (Code, Label)
+> incLabel :: Int -> ST Label
+> incLabel i = S (\n -> (n, n+i))
+
+                      State -> (Code, State)
+                      Label -> (Code, Label)
 
 > comprog' :: Prog -> ST Code
 > comprog' (Assign n e) = return (compexpr e ++ [POP n]) 
