@@ -143,8 +143,9 @@ State monad:
 > exec' (m,s,[]) c = (m,s,[])
 > exec' (m,s,(PUSH i):is) c    = exec' (m,i:s,is) c
 > exec' (m,s,(PUSHV n):is) c   = exec' (m,(getVarData n m):s,is) c
-> exec' (m,h:s,(POP n):is) c   = exec' ((n,h):m,s,is) c
-> exec' (m,y:x:s,(DO op):is) c = exec' (m,(execOp op x y):s,[]) c
+> exec' (m,h:s,(POP n):is) c   = exec' (setVarData n h m,s,is) c
+>                              -- | otherwise = exec' ((n,h):m,s,is) c
+> exec' (m,y:x:s,(DO op):is) c = exec' (m,(execOp op x y):s,is) c
 > exec' (m,s,(JUMP l):is) c    = exec' (m,s,jumpToLabel c l) c
 > exec' (m,h:s,(JUMPZ l):is) c | h == 0 = exec' (m,s,jumpToLabel c l) c
 >                              | otherwise = exec' (m,s,is) c
@@ -153,6 +154,11 @@ State monad:
 > getVarData :: Name -> Mem -> Int
 > getVarData _ [] = -1
 > getVarData n m = head [d | (n',d) <- m, n'==n]
+
+> setVarData :: Name -> Int -> Mem -> Mem
+> setVarData n i [] = (n,i) : []
+> setVarData n i ((n',i'):vs) | n == n' = (n',i) : vs
+>                             | otherwise = (n',i') : setVarData n i vs
                         
 > execOp :: Op -> Int -> Int -> Int
 > execOp Add x y = x+y
