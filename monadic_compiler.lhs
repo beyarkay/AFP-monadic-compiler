@@ -134,10 +134,15 @@ State monad:
 >                             c' <- comprog' (Seqn ps)
 >                             return (c ++ c')
 
+exec executes code by calling exec' with an memory and stack
+
 > exec :: Code -> Mem
 > exec c = m 
 >          where
 >              (m,_,_) = exec' ([],[],c) c
+
+exec' recursively executes code with a given memory and stack
+it returns the updated memory, stack and code
 
 > exec' :: (Mem,Stack,Code) -> Code -> (Mem,Stack,Code)
 > exec' (m,s,[]) c = (m,s,[])
@@ -151,20 +156,30 @@ State monad:
 >                              | otherwise = exec' (m,s,is) c
 > exec' (m,s,(LABEL l):is) c = exec' (m,s,is) c
 
+getVarData returns the value stored in a variable of a given name
+
 > getVarData :: Name -> Mem -> Int
 > getVarData _ [] = -1
 > getVarData n m = head [d | (n',d) <- m, n'==n]
+
+setVarData will update the value of a variable in memory
+if a variable of that name does not exist yet it will create one will the given value
 
 > setVarData :: Name -> Int -> Mem -> Mem
 > setVarData n i [] = (n,i) : []
 > setVarData n i ((n',i'):vs) | n == n' = (n',i) : vs
 >                             | otherwise = (n',i') : setVarData n i vs
                         
+execOp pattern matches for op and calcuates a result based on two integer arguments
+
 > execOp :: Op -> Int -> Int -> Int
 > execOp Add x y = x+y
 > execOp Sub x y = x-y
 > execOp Mul x y = x*y
 > execOp Div x y = x `div` y
+
+jumpToLabel 'eats' instructions until a given label is found and returns the code from that point onwards
+kind of like drop function
 
 > jumpToLabel :: Code -> Label -> Code
 > jumpToLabel [] _ = [] 
