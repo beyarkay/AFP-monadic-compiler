@@ -94,7 +94,7 @@ State monad:
 >                         where
 >                           (cp, lp) = comprog p (l+2)
 > comprog (Seqn []) l = ([],l)
-> comprog (Seqn (p:ps)) l = ([] ++ c ++ c', l'')
+> comprog (Seqn (p:ps)) l = (c ++ c', l'')
 >                           where
 >                            (c,l') = comprog p l
 >                            (c',l'') = comprog (Seqn ps) l' 
@@ -118,5 +118,9 @@ State monad:
 >                           l' <- nextLabel
 >                           cp <- comprog' p
 >                           return ([LABEL l] ++ compexpr e ++ [JUMPZ l'] ++ cp ++ [JUMP l, LABEL l'])
+> comprog' (Seqn []) = return []
+> comprog' (Seqn (p:ps)) = do c <- comprog' p
+>                             cs <- comprog' (Seqn ps)
+>                             return (c++cs)
 
 --------------------------------------------------------------------------------
