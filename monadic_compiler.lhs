@@ -113,10 +113,10 @@ State monad:
                       Label -> (Code, Label)
 
 > comprog' :: Prog -> ST Code
-> comprog' (Assign n e) = return (compexpr e ++ [POP n])
-> comprog' (While e p) = do l1 <- nextLabel
->                           l2 <- nextLabel
->                           
-
+> comprog' (Assign n e) = return (compexpr e ++ [POP n]) 
+> comprog' (While e p) = do l <- nextLabel
+>                           l' <- nextLabel
+>                           cp <- comprog' p
+>                           return ([LABEL l] ++ compexpr e ++ [JUMPZ l'] ++ cp ++ [JUMP l, LABEL l'])
 
 --------------------------------------------------------------------------------
