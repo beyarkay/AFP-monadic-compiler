@@ -103,4 +103,12 @@ State monad:
 >                           (cp2, lp2) = comprog p2 (l+2)
 >                           (cp1, lp1) = comprog p1 lp2
 
+> nextLabel :: ST Label
+> nextLabel = S (\n -> (n, n+1))
+
+                    State -> (Code, State)
+                    Label -> (Code, Label)
+comprog' :: Prog -> ST Code
+comprog (Assign n e) 
+
 --------------------------------------------------------------------------------
