@@ -81,7 +81,10 @@ State monad:
 >    -- (>>=) :: ST a -> (a -> ST b) -> ST b
 >    st >>= f = S (\s -> let (x,s') = app st s in app (f x) s')
 
-
+> comp :: Prog -> Code
+> comp p = c
+>          where
+>             (c,_) = app (comprog' p) 0
 
 > compexpr :: Expr -> Code
 > compexpr (Val n) = [PUSH n]
@@ -132,6 +135,35 @@ State monad:
 >                             return (c ++ c')
 
 > exec :: Code -> Mem
-> exec (PUSH x:is) = [('A',x)]
+> exec c = m 
+>          where
+>              (m,_,_) = exec' ([],[],c) c
+
+> exec' :: (Mem,Stack,Code) -> Code -> (Mem,Stack,Code)
+> exec' (m,s,[]) c = (m,s,[])
+> exec' (m,s,(PUSH i):is) c    = exec' (m,i:s,is) c
+> exec' (m,s,(PUSHV n):is) c   = exec' (m,(getVarData n m):s,is) c
+> exec' (m,h:s,(POP n):is) c   = exec' ((n,h):m,s,is) c
+> exec' (m,y:x:s,(DO op):is) c = exec' (m,(execOp op x y):s,[]) c
+> exec' (m,s,(JUMP l):is) c    = exec' (m,s,jumpToLabel c l) c
+> exec' (m,h:s,(JUMPZ l):is) c | h == 0 = exec' (m,s,jumpToLabel c l) c
+>                              | otherwise = exec' (m,s,is) c
+> exec' (m,s,(LABEL l):is) c = exec' (m,s,is) c
+
+> getVarData :: Name -> Mem -> Int
+> getVarData _ [] = -1
+> getVarData n m = head [d | (n',d) <- m, n'==n]
+                        
+> execOp :: Op -> Int -> Int -> Int
+> execOp Add x y = x+y
+> execOp Sub x y = x-y
+> execOp Mul x y = x*y
+> execOp Div x y = x `div` y
+
+> jumpToLabel :: Code -> Label -> Code
+> jumpToLabel [] _ = [] 
+> jumpToLabel (LABEL i:is) l | i == l = is
+>                            | otherwise = jumpToLabel is l
+> jumpToLabel (i:is) l = jumpToLabel is l
 
 --------------------------------------------------------------------------------
