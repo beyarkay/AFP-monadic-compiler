@@ -81,16 +81,22 @@ State monad:
 >    -- (>>=) :: ST a -> (a -> ST b) -> ST b
 >    st >>= f = S (\s -> let (x,s') = app st s in app (f x) s')
 
+Calls the comprog' function but removes the extra data.
+
 > comp :: Prog -> Code
 > comp p = c
 >          where
 >             (c,_) = app (comprog' p) 0
+
+Converts an expression into code.
 
 > compexpr :: Expr -> Code
 > compexpr (Val n) = [PUSH n]
 > compexpr (Var x) = [PUSHV x]
 > compexpr (App o x y) = compexpr x ++ compexpr y ++ [DO o]                                      
 
+
+Takes a program and returns code, however the labels are manually passed through.
 
 > comprog :: Prog -> Label -> (Code, Label)
 > comprog (Assign n e) l = (compexpr e ++ [POP n], l)
@@ -107,14 +113,12 @@ State monad:
 >                           (cp2, lp2) = comprog p2 (l+2)
 >                           (cp1, lp1) = comprog p1 lp2
 
+returns the current state, and sets the new state to be a fresh integer.
+
 > nextLabel :: ST Label
 > nextLabel = S (\n -> (n, n+1))
 
-> incLabel :: Int -> ST Label
-> incLabel i = S (\n -> (n, n+i))
-
-                      State -> (Code, State)
-                      Label -> (Code, Label)
+Takes a Program and returns Code, however, uses the state monad this time to create the labels.
 
 > comprog' :: Prog -> ST Code
 > comprog' (Assign n e) = return (compexpr e ++ [POP n]) 
